@@ -15,11 +15,9 @@ export function createClient() {
         getAll() {
           return cookieStore.getAll()
         },
-        setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
-          // setAll is called when the session is refreshed.
-          // In Server Components the response headers are read-only, so
-          // this may throw — we silence that error because the middleware
-          // already handles writing the refreshed token to the browser.
+        setAll(cookiesToSet) {
+          // In Server Components the response is read-only — set() throws.
+          // Silenced: the middleware already writes refreshed tokens to the browser.
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)

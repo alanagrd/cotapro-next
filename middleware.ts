@@ -24,17 +24,21 @@ export async function middleware(request: NextRequest) {
         getAll() {
           return request.cookies.getAll()
         },
-        setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
-          // 1. Write cookies onto the request so downstream middleware/server
-          //    components see the refreshed session.
+        setAll(cookiesToSet, headers) {
+          // 1. Write cookies onto the request so downstream server components
+          //    see the refreshed session immediately.
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           )
-          // 2. Create a fresh response that carries the updated cookies back
-          //    to the browser.
+          // 2. Fresh response with updated request cookies.
           supabaseResponse = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
+          )
+          // 3. Apply CDN cache-control headers (Cache-Control: private, no-store etc.)
+          //    so auth responses are never cached by reverse proxies.
+          Object.entries(headers).forEach(([key, value]) =>
+            supabaseResponse.headers.set(key, value)
           )
         },
       },
