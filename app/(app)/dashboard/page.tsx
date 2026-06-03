@@ -37,20 +37,22 @@ export default async function DashboardPage() {
   // ── Fetch data independently so one failing query doesn't crash the page ──
   const [ativos, cotas, semanas, receitas, custos, saldoProgramas, receitaAtivos] =
     await Promise.all([
-      safeQuery(db.from('ativos').select('*').eq('status', 'Ativo')),
-      safeQuery(db.from('cotas').select('*').eq('status', 'Ativa')),
+      safeQuery(db.from('ativos').select('*').eq('user_id', userId).eq('status', 'Ativo')),
+      safeQuery(db.from('cotas').select('*').eq('user_id', userId).eq('status', 'Ativa')),
       safeQuery(
         db.from('semanas')
           .select('*, cotas(unidade, ativos(nome))')
+          .eq('user_id', userId)
           .order('data_inicio', { ascending: false })
       ),
       safeQuery(
         db.from('receitas')
           .select('*')
+          .eq('user_id', userId)
           .in('status', ['Recebido', 'Parcial', 'Previsto'])
       ),
-      safeQuery(db.from('custos').select('*').eq('status', 'Pendente')),
-      // Views não herdam RLS — filtrar explicitamente por user_id
+      safeQuery(db.from('custos').select('*').eq('user_id', userId).eq('status', 'Pendente')),
+      // Views não herdam RLS — filtro explícito por user_id obrigatório
       safeQuery(db.from('vw_saldo_programas').select('*').eq('user_id', userId)),
       safeQuery(
         db.from('vw_receita_por_ativo')
