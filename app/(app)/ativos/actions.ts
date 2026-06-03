@@ -10,12 +10,12 @@ export async function createAtivo(formData: FormData): Promise<ActionResult> {
     const { supabase, userId, error: authError } = await getActionUser()
     if (authError) return { error: authError }
 
-    const { data: profile } = await supabase
+    const { data: profile } = await (supabase as any)
       .from('profiles').select('plano').eq('id', userId).single()
     const limits = getPlanLimits((profile as { plano: string } | null)?.plano)
 
     if (limits.ativos !== Infinity) {
-      const { count } = await supabase
+      const { count } = await (supabase as any)
         .from('ativos')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', userId)
@@ -72,7 +72,7 @@ export async function deleteAtivo(id: string): Promise<ActionResult> {
     const { supabase, userId, error: authError } = await getActionUser()
     if (authError) return { error: authError }
 
-    const { error } = await supabase.from('ativos')
+    const { error } = await (supabase as any).from('ativos')
       .delete().eq('id', id).eq('user_id', userId)
     if (error) return { error: error.message }
     revalidatePath('/ativos')

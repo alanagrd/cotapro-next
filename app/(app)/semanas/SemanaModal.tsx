@@ -65,12 +65,12 @@ export function SemanaModal({ cotas, trigger, editData, onSuccess }: Props) {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session?.user) { setError('Sessão expirada. Faça login novamente.'); return }
 
-      const { data: profile } = await supabase
+      const { data: profile } = await (supabase as any)
         .from('profiles').select('plano').eq('id', session.user.id).single()
       const limits = getPlanLimits((profile as { plano: string } | null)?.plano)
 
       if (!isEdit && limits.semanas !== Infinity) {
-        const { count } = await supabase
+        const { count } = await (supabase as any)
           .from('semanas')
           .select('*', { count: 'exact', head: true })
           .eq('user_id', session.user.id)

@@ -41,12 +41,12 @@ export function CotaModal({ ativos, trigger, editData, onSuccess }: Props) {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session?.user) { setError('Sessão expirada. Faça login novamente.'); return }
 
-      const { data: profile } = await supabase
+      const { data: profile } = await (supabase as any)
         .from('profiles').select('plano').eq('id', session.user.id).single()
       const limits = getPlanLimits((profile as { plano: string } | null)?.plano)
 
       if (!isEdit && limits.cotas !== Infinity) {
-        const { count } = await supabase
+        const { count } = await (supabase as any)
           .from('cotas')
           .select('*', { count: 'exact', head: true })
           .eq('user_id', session.user.id)
@@ -89,7 +89,7 @@ export function CotaModal({ ativos, trigger, editData, onSuccess }: Props) {
       if (payload.taxa_manutencao > 0 && cotaId) {
         const anoAtual = new Date().getFullYear()
         // Verifica se já existe custo de manutenção para este cota+ano
-        const { data: existing } = await supabase
+        const { data: existing } = await (supabase as any)
           .from('custos')
           .select('id')
           .eq('cota_id', cotaId)

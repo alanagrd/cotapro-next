@@ -35,7 +35,7 @@ export default function ConfiguracoesPage() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.user) { router.replace('/login'); return }
 
-    const { data: p } = await supabase
+    const { data: p } = await (supabase as any)
       .from('profiles')
       .select('*')
       .eq('id', session.user.id)

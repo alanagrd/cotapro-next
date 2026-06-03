@@ -27,7 +27,7 @@ export default function AtivosPage() {
     const user = session?.user
     if (!user) { router.replace('/login'); return }
 
-    const { data, error: qErr } = await supabase
+    const { data, error: qErr } = await (supabase as any)
       .from('ativos')
       .select('*')
       .order('nome')
