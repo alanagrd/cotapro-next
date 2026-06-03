@@ -10,15 +10,20 @@ export async function createAtivo(formData: FormData): Promise<ActionResult> {
     const { supabase, userId, error: authError } = await getActionUser()
     if (authError) return { error: authError }
 
-    const { data: profile } = await (supabase as any)
+    const { data: profile, error: profileError } = await (supabase as any)
       .from('profiles').select('plano').eq('id', userId).single()
-    const limits = getPlanLimits((profile as { plano: string } | null)?.plano)
+    console.log('[createAtivo] userId:', userId, '| profile:', profile, '| profileError:', profileError)
+
+    const planoValue = (profile as { plano: string } | null)?.plano
+    const limits = getPlanLimits(planoValue)
+    console.log('[createAtivo] plano:', planoValue, '| limits.ativos:', limits.ativos)
 
     if (limits.ativos !== Infinity) {
-      const { count } = await (supabase as any)
+      const { count, error: countError } = await (supabase as any)
         .from('ativos')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', userId)
+      console.log('[createAtivo] count:', count, '| countError:', countError)
       if ((count ?? 0) >= limits.ativos) {
         return { error: `Seu plano ${limits.name} permite até ${limits.ativos} ativo(s). Faça upgrade para adicionar mais.` }
       }
