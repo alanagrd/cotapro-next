@@ -68,8 +68,7 @@ export default async function DashboardPage() {
   const yrPrev  = yrNow - 1
 
   const recAcum = receitas
-    .filter(r => r.status !== 'Previsto')
-    .reduce((s: number, r: any) => s + (r.valor_liquido ?? 0), 0)
+    .reduce((s: number, r: any) => s + (r.valor_bruto ?? 0), 0)
 
   const recAno = receitas
     .filter((r: any) => r.data_competencia?.startsWith(String(yrNow)) && r.status !== 'Previsto')
@@ -154,7 +153,7 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           {
-            label: 'Receita Líquida Total',
+            label: 'Receita Bruta Total',
             value: brl(recAcum),
             sub: deltaRec !== null
               ? `${deltaRec >= 0 ? '↑' : '↓'} ${Math.abs(deltaRec)}% vs ${yrPrev}`
