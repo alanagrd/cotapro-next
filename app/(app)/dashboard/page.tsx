@@ -26,7 +26,13 @@ export default async function DashboardPage() {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session?.user) redirect('/login')
 
+  const userId = session.user.id
   const db = supabase as any
+
+  // Fetch plan to conditionally show modules
+  const { data: profileData } = await db
+    .from('profiles').select('plano').eq('id', userId).single()
+  const plano: string = profileData?.plano ?? 'free'
 
   // ── Fetch data independently so one failing query doesn't crash the page ──
   const [ativos, cotas, semanas, receitas, custos, saldoProgramas, receitaAtivos] =
@@ -44,10 +50,12 @@ export default async function DashboardPage() {
           .in('status', ['Recebido', 'Parcial', 'Previsto'])
       ),
       safeQuery(db.from('custos').select('*').eq('status', 'Pendente')),
-      safeQuery(db.from('vw_saldo_programas').select('*')),
+      // Views não herdam RLS — filtrar explicitamente por user_id
+      safeQuery(db.from('vw_saldo_programas').select('*').eq('user_id', userId)),
       safeQuery(
         db.from('vw_receita_por_ativo')
           .select('*')
+          .eq('user_id', userId)
           .order('receita_liquida_total', { ascending: false })
       ),
     ])
@@ -163,12 +171,12 @@ export default async function DashboardPage() {
             sub: `${ativos.length} ativo(s) · ${cotas.length} cota(s)`,
             color: 'text-orange-500',
           },
-          {
+          ...(plano !== 'free' ? [{
             label: 'Saldo de Pontos',
             value: `${saldoTotal.toLocaleString('pt-BR')} pts`,
             sub: `${saldoProgramas.length} programa(s)`,
             color: 'text-purple-600',
-          },
+          }] : []),
         ].map(k => (
           <div key={k.label} className="card p-5">
             <div className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-2">
