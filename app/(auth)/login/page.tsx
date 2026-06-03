@@ -1,9 +1,11 @@
 'use client'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
+  const router   = useRouter()
   const supabase = createClient()
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
@@ -15,30 +17,25 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
 
-    const { error: authError } = await supabase.auth.signInWithPassword({
+    const { data, error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
 
-    if (authError) {
-      // Always reset loading so the button becomes clickable again
+    if (authError || !data.session) {
       setLoading(false)
       setError(
-        authError.message === 'Invalid login credentials'
+        authError?.message === 'Invalid login credentials'
           ? 'E-mail ou senha incorretos.'
-          : authError.message
+          : (authError?.message ?? 'Sessão não estabelecida. Verifique se o e-mail foi confirmado.')
       )
       return
     }
 
-    // Hard navigation: forces the browser to make a new full request so the
-    // middleware can read the fresh session cookie and let the user through.
-    // Using router.push() alone is unreliable here because the client-side
-    // router does not reload server components synchronously after signIn.
-    window.location.href = '/dashboard'
-    // Note: loading stays true intentionally while the page is navigating.
-    // If navigation somehow fails, the user sees the spinner — not a broken
-    // button — which is the safer UX choice.
+    // router.refresh() força o Next.js a revalidar os Server Components com
+    // a sessão recém-criada antes de navegar, evitando o loop de redirect.
+    router.refresh()
+    router.push('/dashboard')
   }
 
   return (
