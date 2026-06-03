@@ -28,28 +28,27 @@ export default async function DashboardPage() {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session?.user) redirect('/login')
 
+  const db = supabase as any
+
   // ── Fetch data independently so one failing query doesn't crash the page ──
   const [ativos, cotas, semanas, receitas, custos, saldoProgramas, receitaAtivos] =
     await Promise.all([
-      safeQuery(supabase.from('ativos').select('*').eq('status', 'Ativo')),
-      safeQuery(supabase.from('cotas').select('*').eq('status', 'Ativa')),
+      safeQuery(db.from('ativos').select('*').eq('status', 'Ativo')),
+      safeQuery(db.from('cotas').select('*').eq('status', 'Ativa')),
       safeQuery(
-        supabase
-          .from('semanas')
+        db.from('semanas')
           .select('*, cotas(unidade, ativos(nome))')
           .order('data_inicio', { ascending: false })
       ),
       safeQuery(
-        supabase
-          .from('receitas')
+        db.from('receitas')
           .select('*')
           .in('status', ['Recebido', 'Parcial', 'Previsto'])
       ),
-      safeQuery(supabase.from('custos').select('*').eq('status', 'Pendente')),
-      // Views might not exist yet — safeQuery returns [] on error
-      safeQuery(supabase.from('vw_saldo_programas').select('*') as any),
+      safeQuery(db.from('custos').select('*').eq('status', 'Pendente')),
+      safeQuery(db.from('vw_saldo_programas').select('*')),
       safeQuery(
-        (supabase.from('vw_receita_por_ativo') as any)
+        db.from('vw_receita_por_ativo')
           .select('*')
           .order('receita_liquida_total', { ascending: false })
       ),

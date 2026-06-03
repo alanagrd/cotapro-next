@@ -43,9 +43,9 @@ export default function RelatoriosPage() {
     if (!session?.user) { router.replace('/login'); return }
 
     const [{ data: semanas }, { data: custos }, { data: cotasNomes }] = await Promise.all([
-      supabase.from('semanas').select('id, status, cota_id, data_inicio, data_recebimento, canal, valor_recebido, valor_previsto, taxa_comissao'),
-      supabase.from('custos').select('ativo_id, valor, status, ano'),
-      supabase.from('cotas').select('id, ativo_id, ativos(id, nome)'),
+      (supabase as any).from('semanas').select('id, status, cota_id, data_inicio, data_recebimento, canal, valor_recebido, valor_previsto, taxa_comissao'),
+      (supabase as any).from('custos').select('ativo_id, valor, status, ano'),
+      (supabase as any).from('cotas').select('id, ativo_id, ativos(id, nome)'),
     ])
 
     // cota → ativo lookup

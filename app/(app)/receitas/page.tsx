@@ -41,7 +41,7 @@ export default function ReceitasPage() {
         .select('id, numero_semana, ano, cotas(unidade, ativos(nome))')
         .order('data_inicio', { ascending: false })
         .limit(200),
-      supabase.from('ativos').select('id, nome').eq('status', 'Ativo').order('nome'),
+      (supabase as any).from('ativos').select('id, nome').eq('status', 'Ativo').order('nome'),
     ])
 
     if (e1) { setError(e1.message); setLoading(false); return }
@@ -61,7 +61,7 @@ export default function ReceitasPage() {
     if (!window.confirm('Excluir esta receita?')) return
     setDeleting(id)
     const supabase = createClient()
-    const { error: err } = await supabase.from('receitas').delete().eq('id', id)
+    const { error: err } = await (supabase as any).from('receitas').delete().eq('id', id)
     setDeleting(null)
     if (err) { alert('Erro ao excluir: ' + err.message); return }
     setReceitas((prev: any[]) => prev.filter(r => r.id !== id))

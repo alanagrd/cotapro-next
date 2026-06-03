@@ -63,7 +63,7 @@ export default function SemanasPage() {
     if (!window.confirm(`Excluir a semana "${label}"?`)) return
     setDeleting(id)
     const supabase = createClient()
-    const { error: err } = await supabase.from('semanas').delete().eq('id', id)
+    const { error: err } = await (supabase as any).from('semanas').delete().eq('id', id)
     setDeleting(null)
     if (err) { alert('Erro ao excluir: ' + err.message); return }
     setSemanas((prev: any[]) => prev.filter(s => s.id !== id))

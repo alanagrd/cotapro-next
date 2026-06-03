@@ -26,9 +26,9 @@ export default function CustosPage() {
     if (!session?.user) { router.replace('/login'); return }
 
     const [{ data: c, error: e1 }, { data: a }, { data: q }] = await Promise.all([
-      supabase.from('custos').select('*, ativos(id,nome), cotas(id,unidade)').order('ano', { ascending: false }).order('created_at', { ascending: false }),
-      supabase.from('ativos').select('id,nome').eq('status','Ativo').order('nome'),
-      supabase.from('cotas').select('id,unidade,ativos(nome)').order('created_at'),
+      (supabase as any).from('custos').select('*, ativos(id,nome), cotas(id,unidade)').order('ano', { ascending: false }).order('created_at', { ascending: false }),
+      (supabase as any).from('ativos').select('id,nome').eq('status','Ativo').order('nome'),
+      (supabase as any).from('cotas').select('id,unidade,ativos(nome)').order('created_at'),
     ])
     if (e1) { setError(e1.message); setLoading(false); return }
     setCustos(c ?? [])

@@ -55,7 +55,7 @@ export default function CotasPage() {
     if (!window.confirm(`Excluir a cota "${nome}"? As semanas vinculadas também serão excluídas.`)) return
     setDeleting(id)
     const supabase = createClient()
-    const { error: err } = await supabase.from('cotas').delete().eq('id', id)
+    const { error: err } = await (supabase as any).from('cotas').delete().eq('id', id)
     setDeleting(null)
     if (err) { alert('Erro ao excluir: ' + err.message); return }
     // Remove from local state instantly (no re-fetch needed)
