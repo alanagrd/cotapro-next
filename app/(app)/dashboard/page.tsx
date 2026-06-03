@@ -61,31 +61,27 @@ export default async function DashboardPage() {
       ),
     ])
 
-  console.log('[dashboard receitas]', {
-    count: receitas?.length,
-    statuses: [...new Set(receitas?.map((r: any) => r.status))],
-    totalBruto: receitas?.reduce((s: number, r: any) => s + (r.valor_bruto ?? 0), 0),
-  })
-
-  // ── KPIs ─────────────────────────────────────────────────────────────────
+  // ── KPIs — usa semanas.valor_recebido, mesma fonte dos Relatórios ────────
   const today   = new Date()
   const yrNow   = today.getFullYear()
   const yrPrev  = yrNow - 1
 
-  const recAcum = receitas
-    .reduce((s: number, r: any) => s + (r.valor_bruto ?? 0), 0)
+  const semsRec = (semanas as any[]).filter((s: any) => (s.valor_recebido ?? 0) > 0)
 
-  const recAno = receitas
-    .filter((r: any) => r.data_competencia?.startsWith(String(yrNow)) && r.status !== 'Previsto')
-    .reduce((s: number, r: any) => s + (r.valor_liquido ?? 0), 0)
+  const recAcum = semsRec
+    .reduce((s: number, r: any) => s + (r.valor_recebido ?? 0), 0)
 
-  const recPrev = receitas
-    .filter((r: any) => r.data_competencia?.startsWith(String(yrNow)) && r.status === 'Previsto')
-    .reduce((s: number, r: any) => s + (r.valor_bruto ?? 0), 0)
+  const recAno = semsRec
+    .filter((s: any) => (s.data_recebimento ?? s.data_inicio)?.startsWith(String(yrNow)))
+    .reduce((s: number, r: any) => s + (r.valor_recebido ?? 0), 0)
 
-  const recAnoPrev = receitas
-    .filter((r: any) => r.data_competencia?.startsWith(String(yrPrev)) && r.status !== 'Previsto')
-    .reduce((s: number, r: any) => s + (r.valor_liquido ?? 0), 0)
+  const recPrev = (semanas as any[])
+    .filter((s: any) => (s.valor_recebido ?? 0) === 0 && (s.valor_previsto ?? 0) > 0 && s.data_inicio?.startsWith(String(yrNow)))
+    .reduce((s: number, r: any) => s + (r.valor_previsto ?? 0), 0)
+
+  const recAnoPrev = semsRec
+    .filter((s: any) => (s.data_recebimento ?? s.data_inicio)?.startsWith(String(yrPrev)))
+    .reduce((s: number, r: any) => s + (r.valor_recebido ?? 0), 0)
 
   const deltaRec = recAnoPrev > 0
     ? Math.round((recAno - recAnoPrev) / recAnoPrev * 100)
