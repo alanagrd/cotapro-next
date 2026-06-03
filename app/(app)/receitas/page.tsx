@@ -30,19 +30,20 @@ export default function ReceitasPage() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.user) { router.replace('/login'); return }
 
-    const [{ data: recData, error: e1 }, { data: semsData }, { data: atsData }] = await Promise.all([
-      supabase
-        .from('receitas')
+    const [r0, r1, r2] = await Promise.all([
+      (supabase as any).from('receitas')
         .select('*, ativos(id, nome), semanas(numero_semana, ano, data_inicio, cotas(unidade))')
         .order('data_competencia', { ascending: false })
         .order('created_at', { ascending: false }),
-      supabase
-        .from('semanas')
+      (supabase as any).from('semanas')
         .select('id, numero_semana, ano, cotas(unidade, ativos(nome))')
         .order('data_inicio', { ascending: false })
         .limit(200),
       (supabase as any).from('ativos').select('id, nome').eq('status', 'Ativo').order('nome'),
     ])
+    const recData: any[] = r0?.data ?? []; const e1 = r0?.error
+    const semsData: any[] = r1?.data ?? []
+    const atsData: any[]  = r2?.data ?? []
 
     if (e1) { setError(e1.message); setLoading(false); return }
     setReceitas(recData ?? [])

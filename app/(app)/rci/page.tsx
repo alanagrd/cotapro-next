@@ -17,10 +17,12 @@ export default function RCIPage() {
     const supabase = createClient()
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.user) { router.replace('/login'); return }
-    const [{ data: r }, { data: s }] = await Promise.all([
+    const [r0, r1] = await Promise.all([
       (supabase as any).from('rci').select('*, semanas(numero_semana, data_inicio, cotas(unidade, ativos(nome)))').order('data_troca', { ascending: false }),
       (supabase as any).from('semanas').select('id, numero_semana, data_inicio, cotas(unidade, ativos(nome))').order('data_inicio', { ascending: false }).limit(100),
     ])
+    const r: any[] = r0?.data ?? []
+    const s: any[] = r1?.data ?? []
     setRci(r ?? [])
     setSemOpts((s ?? []).map((x: any) => ({ id: x.id, label: `${x.cotas?.ativos?.nome??'?'} — Sem ${x.numero_semana}/${x.data_inicio?.substring(0,4)??'?'}` })))
     setLoading(false)

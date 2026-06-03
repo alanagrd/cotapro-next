@@ -25,11 +25,14 @@ export default function CustosPage() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.user) { router.replace('/login'); return }
 
-    const [{ data: c, error: e1 }, { data: a }, { data: q }] = await Promise.all([
+    const [r0, r1, r2] = await Promise.all([
       (supabase as any).from('custos').select('*, ativos(id,nome), cotas(id,unidade)').order('ano', { ascending: false }).order('created_at', { ascending: false }),
       (supabase as any).from('ativos').select('id,nome').eq('status','Ativo').order('nome'),
       (supabase as any).from('cotas').select('id,unidade,ativos(nome)').order('created_at'),
     ])
+    const c: any[] = r0?.data ?? []; const e1 = r0?.error
+    const a: any[] = r1?.data ?? []
+    const q: any[] = r2?.data ?? []
     if (e1) { setError(e1.message); setLoading(false); return }
     setCustos(c ?? [])
     setAtivos(a ?? [])

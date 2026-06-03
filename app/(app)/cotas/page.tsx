@@ -29,18 +29,18 @@ export default function CotasPage() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.user) { router.replace('/login'); return }
 
-    const [{ data: cotasData, error: e1 }, { data: ativosData }] = await Promise.all([
-      supabase
-        .from('cotas')
+    const [r0, r1] = await Promise.all([
+      (supabase as any).from('cotas')
         .select('*, ativos(id, nome, tipo)')
         .order('created_at', { ascending: false }),
-      supabase
-        .from('ativos')
+      (supabase as any).from('ativos')
         .select('id, nome')
         .eq('status', 'Ativo')
         .eq('tipo', 'Multipropriedade')
         .order('nome'),
     ])
+    const cotasData: any[] = r0?.data ?? []; const e1 = r0?.error
+    const ativosData: any[] = r1?.data ?? []
 
     if (e1) { setError(e1.message); setLoading(false); return }
     setCotas((cotasData ?? []) as CotaWithAtivo[])

@@ -26,10 +26,12 @@ export default function MovimentacoesPage() {
     const supabase = createClient()
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.user) { router.replace('/login'); return }
-    const [{ data: m }, { data: p }] = await Promise.all([
+    const [r0, r1] = await Promise.all([
       (supabase as any).from('movimentacoes_pontos').select('*, programas_pontos(id,nome,saldo_inicial,emoji)').order('data', { ascending: false }),
       (supabase as any).from('programas_pontos').select('id,nome,emoji,saldo_inicial').order('nome'),
     ])
+    const m: any[] = r0?.data ?? []
+    const p: any[] = r1?.data ?? []
     setMovs(m ?? [])
     setProgs(p ?? [])
     // Compute saldos

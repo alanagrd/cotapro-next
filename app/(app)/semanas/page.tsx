@@ -35,16 +35,16 @@ export default function SemanasPage() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.user) { router.replace('/login'); return }
 
-    const [{ data: semsData, error: e1 }, { data: cotasData }] = await Promise.all([
-      supabase
-        .from('semanas')
+    const [r0, r1] = await Promise.all([
+      (supabase as any).from('semanas')
         .select('*, cotas(id, unidade, ativos(id, nome))')
         .order('data_inicio', { ascending: false }),
-      supabase
-        .from('cotas')
+      (supabase as any).from('cotas')
         .select('id, unidade, ativos(id, nome)')
         .order('created_at'),
     ])
+    const semsData: any[] = r0?.data ?? []; const e1 = r0?.error
+    const cotasData: any[] = r1?.data ?? []
 
     if (e1) { setError(e1.message); setLoading(false); return }
     setSemanas(semsData ?? [])

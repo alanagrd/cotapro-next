@@ -42,11 +42,14 @@ export default function RelatoriosPage() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.user) { router.replace('/login'); return }
 
-    const [{ data: semanas }, { data: custos }, { data: cotasNomes }] = await Promise.all([
+    const [r0, r1, r2] = await Promise.all([
       (supabase as any).from('semanas').select('id, status, cota_id, data_inicio, data_recebimento, canal, valor_recebido, valor_previsto, taxa_comissao'),
       (supabase as any).from('custos').select('ativo_id, valor, status, ano'),
       (supabase as any).from('cotas').select('id, ativo_id, ativos(id, nome)'),
     ])
+    const semanas: any[]    = r0?.data ?? []
+    const custos: any[]     = r1?.data ?? []
+    const cotasNomes: any[] = r2?.data ?? []
 
     // cota → ativo lookup
     const cotaToAtivo: Record<string,{id:string;nome:string}> = {}

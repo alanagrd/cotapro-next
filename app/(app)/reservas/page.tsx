@@ -20,10 +20,12 @@ export default function ReservasPage() {
     const supabase = createClient()
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.user) { router.replace('/login'); return }
-    const [{ data: r }, { data: p }] = await Promise.all([
+    const [r0, r1] = await Promise.all([
       (supabase as any).from('reservas_pontos').select('*, programas_pontos(id,nome,emoji)').order('data_checkin', { ascending: false }),
       (supabase as any).from('programas_pontos').select('id,nome,emoji').order('nome'),
     ])
+    const r: any[] = r0?.data ?? []
+    const p: any[] = r1?.data ?? []
     setReservas(r ?? []); setProgs(p ?? []); setLoading(false)
   }, [router])
 

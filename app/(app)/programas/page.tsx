@@ -24,11 +24,14 @@ export default function ProgramasPage() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.user) { router.replace('/login'); return }
 
-    const [{ data: p }, { data: m }, { data: a }] = await Promise.all([
+    const [r0, r1, r2] = await Promise.all([
       (supabase as any).from('programas_pontos').select('*, ativos(id,nome)').order('created_at'),
       (supabase as any).from('movimentacoes_pontos').select('programa_id, tipo, quantidade'),
       (supabase as any).from('ativos').select('id, nome').eq('status','Ativo').order('nome'),
     ])
+    const p: any[] = r0?.data ?? []
+    const m: any[] = r1?.data ?? []
+    const a: any[] = r2?.data ?? []
 
     // Compute saldo for each programa
     const sd: Record<string, number> = {}
