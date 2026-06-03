@@ -62,6 +62,12 @@ export default async function DashboardPage() {
       ),
     ])
 
+  console.log('[dashboard receitas]', {
+    count: receitas?.length,
+    statuses: [...new Set(receitas?.map((r: any) => r.status))],
+    totalBruto: receitas?.reduce((s: number, r: any) => s + (r.valor_bruto ?? 0), 0),
+  })
+
   // ── KPIs ─────────────────────────────────────────────────────────────────
   const today   = new Date()
   const yrNow   = today.getFullYear()
