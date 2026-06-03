@@ -70,13 +70,13 @@ export function CotaModal({ ativos, trigger, editData, onSuccess }: Props) {
       let cotaId = editData?.id ?? ''
 
       if (isEdit) {
-        const { error: err } = await supabase
+        const { error: err } = await (supabase as any)
           .from('cotas')
           .update(payload)
           .eq('id', editData.id)
         if (err) { setError(err.message); return }
       } else {
-        const { data: nova, error: err } = await supabase
+        const { data: nova, error: err } = await (supabase as any)
           .from('cotas')
           .insert({ ...payload, user_id: session.user.id })
           .select('id')
@@ -98,7 +98,7 @@ export function CotaModal({ ativos, trigger, editData, onSuccess }: Props) {
           .maybeSingle()
 
         if (!existing) {
-          await supabase.from('custos').insert({
+          await (supabase as any).from('custos').insert({
             user_id:        session.user.id,
             ativo_id:       payload.ativo_id || null,
             cota_id:        cotaId,

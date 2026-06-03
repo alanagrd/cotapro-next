@@ -24,8 +24,8 @@ export function RCIModal({ semanas, trigger, editData, onSuccess }: Props) {
       if(!session?.user){setError('Sessão expirada.');return}
       const str=(k:string)=>{const s=String(fd.get(k)??'').trim();return s||null}
       const payload={semana_id:str('semana_id'),data_troca:str('data_troca')??new Date().toISOString().split('T')[0],pontos_recebidos:rec,pontos_utilizados:parseInt(String(fd.get('pontos_utilizados')??'0'))||0,data_expiracao:str('data_expiracao'),destino:str('destino'),observacoes:str('observacoes')}
-      if(isEdit){const{error:err}=await supabase.from('rci').update(payload).eq('id',editData.id);if(err){setError(err.message);return}}
-      else{const{error:err}=await supabase.from('rci').insert({...payload,user_id:session.user.id});if(err){setError(err.message);return}}
+      if(isEdit){const{error:err}=await (supabase as any).from('rci').update(payload).eq('id',editData.id);if(err){setError(err.message);return}}
+      else{const{error:err}=await (supabase as any).from('rci').insert({...payload,user_id:session.user.id});if(err){setError(err.message);return}}
       close();onSuccess?.()
     }finally{setPending(false)}
   }

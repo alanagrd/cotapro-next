@@ -41,8 +41,8 @@ export default function ReservasPage() {
     const str=(k:string)=>{const s=String(fd.get(k)??'').trim();return s||null}
     const payload={programa_id:str('programa_id')??'',hotel,cidade:str('cidade'),data_checkin:str('data_checkin'),data_checkout:str('data_checkout'),pontos_utilizados:parseInt(String(fd.get('pontos_utilizados')??'0'))||0,valor_estimado:parseFloat(String(fd.get('valor_estimado')??'0'))||0,observacoes:str('observacoes')}
     let err:any
-    if(modal.data){({error:err}=await supabase.from('reservas_pontos').update(payload).eq('id',modal.data.id))}
-    else{({error:err}=await supabase.from('reservas_pontos').insert({...payload,user_id:session.user.id}))}
+    if(modal.data){({error:err}=await (supabase as any).from('reservas_pontos').update(payload).eq('id',modal.data.id))}
+    else{({error:err}=await (supabase as any).from('reservas_pontos').insert({...payload,user_id:session.user.id}))}
     setPending(false);if(err){setMError(err.message);return}
     setModal({open:false});load()
   }

@@ -100,13 +100,13 @@ export function SemanaModal({ cotas, trigger, editData, onSuccess }: Props) {
       }
 
       if (isEdit) {
-        const { error: err } = await supabase
+        const { error: err } = await (supabase as any)
           .from('semanas')
           .update(payload)
           .eq('id', editData.id)
         if (err) { setError(err.message); return }
       } else {
-        const { error: err } = await supabase
+        const { error: err } = await (supabase as any)
           .from('semanas')
           .insert({ ...payload, user_id: session.user.id })
         if (err) { setError(err.message); return }

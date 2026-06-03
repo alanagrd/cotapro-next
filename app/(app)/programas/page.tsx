@@ -67,9 +67,9 @@ export default function ProgramasPage() {
 
     let err: any
     if (modal.data) {
-      ;({ error: err } = await supabase.from('programas_pontos').update(payload).eq('id', modal.data.id))
+      ;({ error: err } = await (supabase as any).from('programas_pontos').update(payload).eq('id', modal.data.id))
     } else {
-      ;({ error: err } = await supabase.from('programas_pontos').insert({ ...payload, user_id: session.user.id }))
+      ;({ error: err } = await (supabase as any).from('programas_pontos').insert({ ...payload, user_id: session.user.id }))
     }
     setPending(false)
     if (err) { setMError(err.message); return }

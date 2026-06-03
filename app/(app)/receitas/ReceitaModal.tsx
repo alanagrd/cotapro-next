@@ -69,13 +69,13 @@ export function ReceitaModal({ semanas, ativos, trigger, editData, onSuccess }: 
       }
 
       if (isEdit) {
-        const { error: err } = await supabase
+        const { error: err } = await (supabase as any)
           .from('receitas')
           .update(payload)
           .eq('id', editData.id)
         if (err) { setError(err.message); return }
       } else {
-        const { error: err } = await supabase
+        const { error: err } = await (supabase as any)
           .from('receitas')
           .insert({ ...payload, user_id: session.user.id })
         if (err) { setError(err.message); return }

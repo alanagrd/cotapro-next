@@ -57,8 +57,8 @@ export default function MovimentacoesPage() {
     const str=(k:string)=>{const s=String(fd.get(k)??'').trim();return s||null}
     const payload={programa_id:str('programa_id')??'',data:str('data')??new Date().toISOString().split('T')[0],tipo:str('tipo')??'Entrada',categoria:str('categoria'),quantidade:qtd,validade:str('validade'),descricao:str('descricao'),nome_indicado:str('nome_indicado')}
     let err:any
-    if(modal.data){({error:err}=await supabase.from('movimentacoes_pontos').update(payload).eq('id',modal.data.id))}
-    else{({error:err}=await supabase.from('movimentacoes_pontos').insert({...payload,user_id:session.user.id}))}
+    if(modal.data){({error:err}=await (supabase as any).from('movimentacoes_pontos').update(payload).eq('id',modal.data.id))}
+    else{({error:err}=await (supabase as any).from('movimentacoes_pontos').insert({...payload,user_id:session.user.id}))}
     setPending(false)
     if(err){setMError(err.message);return}
     setModal({open:false});load()

@@ -58,10 +58,10 @@ export function CustoModal({ ativos, cotas, trigger, editData, onSuccess }: Prop
       }
 
       if (isEdit) {
-        const { error: err } = await supabase.from('custos').update(payload).eq('id', editData.id)
+        const { error: err } = await (supabase as any).from('custos').update(payload).eq('id', editData.id)
         if (err) { setError(err.message); return }
       } else {
-        const { error: err } = await supabase.from('custos').insert({ ...payload, user_id: session.user.id })
+        const { error: err } = await (supabase as any).from('custos').insert({ ...payload, user_id: session.user.id })
         if (err) { setError(err.message); return }
       }
       close(); onSuccess?.()

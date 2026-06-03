@@ -61,7 +61,7 @@ export default function ConfiguracoesPage() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.user) { setError('Sessão expirada.'); setSaving(false); return }
 
-    const { error: err } = await supabase
+    const { error: err } = await (supabase as any)
       .from('profiles')
       .update({ nome, telefone: telefone || null, notif_email: notifEmail, notif_dias: notifDias })
       .eq('id', session.user.id)

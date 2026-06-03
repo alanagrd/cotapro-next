@@ -24,7 +24,7 @@ export async function createAtivo(formData: FormData): Promise<ActionResult> {
       }
     }
 
-    const { error } = await supabase.from('ativos').insert({
+    const { error } = await (supabase as any).from('ativos').insert({
       user_id:     userId,
       nome:        String(formData.get('nome') ?? '').trim(),
       tipo:        String(formData.get('tipo') ?? ''),
@@ -47,7 +47,7 @@ export async function updateAtivo(id: string, formData: FormData): Promise<Actio
     const { supabase, userId, error: authError } = await getActionUser()
     if (authError) return { error: authError }
 
-    const { error } = await supabase.from('ativos')
+    const { error } = await (supabase as any).from('ativos')
       .update({
         nome:        String(formData.get('nome') ?? '').trim(),
         tipo:        String(formData.get('tipo') ?? ''),
