@@ -3,9 +3,9 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { getPlanLimits, type PlanId } from '@/lib/plans'
+import { getPlanLimits, PLAN_ORDER, type PlanId } from '@/lib/plans'
 
-interface NavItem { href: string; label: string; icon: React.ReactNode; badge?: string }
+interface NavItem { href: string; label: string; icon: React.ReactNode; badge?: string; minPlan?: PlanId }
 interface NavGroup { group: string; items: NavItem[] }
 
 function Icon({ d, d2 }: { d: string; d2?: string }) {
@@ -29,23 +29,23 @@ const NAV: NavGroup[] = [
       icon: <Icon d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /> },
     { href: '/semanas',  label: 'Semanas',
       icon: <Icon d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /> },
-    { href: '/receitas', label: 'Receitas',
+    { href: '/receitas', label: 'Receitas', minPlan: 'basic',
       icon: <Icon d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /> },
-    { href: '/custos',   label: 'Custos',
+    { href: '/custos',   label: 'Custos',   minPlan: 'basic',
       icon: <Icon d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" /> },
-    { href: '/rci',      label: 'RCI',
+    { href: '/rci',      label: 'RCI',      minPlan: 'plus',
       icon: <Icon d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /> },
   ]},
   { group: 'Pontos', items: [
-    { href: '/programas',     label: 'Programas',
+    { href: '/programas',     label: 'Programas',     minPlan: 'plus',
       icon: <Icon d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /> },
-    { href: '/movimentacoes', label: 'Movimentações',
+    { href: '/movimentacoes', label: 'Movimentações', minPlan: 'plus',
       icon: <Icon d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /> },
-    { href: '/reservas',      label: 'Reservas',
+    { href: '/reservas',      label: 'Reservas',      minPlan: 'plus',
       icon: <Icon d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /> },
   ]},
   { group: 'Análise', items: [
-    { href: '/relatorios',    label: 'Relatórios',
+    { href: '/relatorios',    label: 'Relatórios',    minPlan: 'basic',
       icon: <Icon d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />,
       },
     { href: '/configuracoes', label: 'Configurações',
@@ -73,6 +73,7 @@ export default function Sidebar({ plano }: { plano: string }) {
   const planId = plan.id as PlanId
   const badge = PLAN_BADGE[planId]
   const cta   = UPGRADE_CTA[planId]
+  const userLevel = PLAN_ORDER[planId]
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -102,37 +103,43 @@ export default function Sidebar({ plano }: { plano: string }) {
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto p-2">
-        {NAV.map(group => (
-          <div key={group.group} className="mb-1">
-            <div className="px-3 pt-3 pb-1 text-[10px] font-semibold tracking-widest uppercase text-gray-400">
-              {group.group}
+        {NAV.map(group => {
+          const visible = group.items.filter(item =>
+            !item.minPlan || userLevel >= PLAN_ORDER[item.minPlan]
+          )
+          if (visible.length === 0) return null
+          return (
+            <div key={group.group} className="mb-1">
+              <div className="px-3 pt-3 pb-1 text-[10px] font-semibold tracking-widest uppercase text-gray-400">
+                {group.group}
+              </div>
+              {visible.map(item => {
+                const active = item.href === '/dashboard'
+                  ? pathname === '/dashboard'
+                  : pathname.startsWith(item.href)
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all mb-0.5 ${
+                      active
+                        ? 'bg-indigo-50 text-indigo-700 font-semibold'
+                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    }`}
+                  >
+                    <span className={active ? 'text-indigo-600' : 'text-gray-400'}>{item.icon}</span>
+                    <span className="flex-1">{item.label}</span>
+                    {item.badge && (
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 bg-gray-100 text-gray-400 rounded-full">
+                        {item.badge}
+                      </span>
+                    )}
+                  </Link>
+                )
+              })}
             </div>
-            {group.items.map(item => {
-              const active = item.href === '/dashboard'
-                ? pathname === '/dashboard'
-                : pathname.startsWith(item.href)
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all mb-0.5 ${
-                    active
-                      ? 'bg-indigo-50 text-indigo-700 font-semibold'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                  }`}
-                >
-                  <span className={active ? 'text-indigo-600' : 'text-gray-400'}>{item.icon}</span>
-                  <span className="flex-1">{item.label}</span>
-                  {item.badge && (
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 bg-gray-100 text-gray-400 rounded-full">
-                      {item.badge}
-                    </span>
-                  )}
-                </Link>
-              )
-            })}
-          </div>
-        ))}
+          )
+        })}
       </nav>
 
       {/* Upgrade CTA */}
