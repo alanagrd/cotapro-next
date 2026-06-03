@@ -48,7 +48,6 @@ export default async function DashboardPage() {
       safeQuery(
         db.from('receitas')
           .select('*')
-          .eq('user_id', userId)
           .in('status', ['Recebido', 'Parcial', 'Previsto'])
       ),
       safeQuery(db.from('custos').select('*').eq('user_id', userId).eq('status', 'Pendente')),
