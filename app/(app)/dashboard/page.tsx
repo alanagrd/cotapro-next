@@ -5,9 +5,7 @@ import { brl, fmtDate, SEMANA_STATUS_BADGE, badgeClass } from '@/lib/utils'
 export const dynamic = 'force-dynamic'
 
 // ── Safe wrapper: returns [] on error instead of throwing ────────────────────
-async function safeQuery<T>(
-  promise: Promise<{ data: T[] | null; error: any }>
-): Promise<T[]> {
+async function safeQuery(promise: Promise<any>): Promise<any[]> {
   try {
     const { data, error } = await promise
     if (error) {
