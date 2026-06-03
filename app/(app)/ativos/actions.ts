@@ -12,7 +12,7 @@ export async function createAtivo(formData: FormData): Promise<ActionResult> {
 
     const { data: profile } = await supabase
       .from('profiles').select('plano').eq('id', userId).single()
-    const limits = getPlanLimits(profile?.plano)
+    const limits = getPlanLimits((profile as { plano: string } | null)?.plano)
 
     if (limits.ativos !== Infinity) {
       const { count } = await supabase

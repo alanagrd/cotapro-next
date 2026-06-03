@@ -43,7 +43,7 @@ export function CotaModal({ ativos, trigger, editData, onSuccess }: Props) {
 
       const { data: profile } = await supabase
         .from('profiles').select('plano').eq('id', session.user.id).single()
-      const limits = getPlanLimits(profile?.plano)
+      const limits = getPlanLimits((profile as { plano: string } | null)?.plano)
 
       if (!isEdit && limits.cotas !== Infinity) {
         const { count } = await supabase
